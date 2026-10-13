@@ -1,5 +1,23 @@
 import { useState } from "react";
 
+function getSaveErrorMessage(error) {
+  const message = error?.message ?? "";
+
+  if (error?.code === "PGRST205" || /saved_items.*schema cache|relation .*saved_items.*does not exist/i.test(message)) {
+    return "The saved_items table is missing. Run supabase/schema.sql in your Supabase SQL Editor, then try again.";
+  }
+
+  if (error?.code === "42501" || /row-level security|permission denied/i.test(message)) {
+    return "Supabase denied this save. Run the policies in supabase/schema.sql and make sure you are signed in.";
+  }
+
+  if (/failed to fetch|networkerror/i.test(message)) {
+    return "Could not reach Supabase. Check your project URL and internet connection.";
+  }
+
+  return message || "This item could not be saved. Please try again.";
+}
+
 function AddItemForm({ onAdd }) {
   const [kind, setKind] = useState("link");
   const [name, setName] = useState("");
@@ -45,8 +63,8 @@ function AddItemForm({ onAdd }) {
       setUrl("");
       setFile(null);
       form.reset();
-    } catch {
-      setError("This item could not be saved. Please try again.");
+    } catch (saveError) {
+      setError(getSaveErrorMessage(saveError));
     } finally {
       setIsSaving(false);
     }

@@ -29,6 +29,24 @@ a { color: inherit; }
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-size: 17px; font-weight: 700; }
 .brand-mark { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: #d5e65e; font-family: 'Fraunces', Georgia, serif; font-size: 21px; }
 .topbar-note { color: #74796e; font-size: 12px; }
+.account-controls { display: flex; align-items: center; gap: 18px; }
+.sign-out-button { padding: 7px 0; border: 0; background: transparent; color: #4e6145; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+.auth-layout { min-height: 100vh; display: grid; place-items: center; padding: 36px 20px; background: radial-gradient(ellipse at 14% 18%, #e6ead7 0, transparent 34%), radial-gradient(ellipse at 87% 84%, #dce7e7 0, transparent 35%), #f4f4ee; }
+.auth-panel { width: min(100%, 440px); padding: 38px; border: 1px solid #dedfd6; border-radius: 5px; background: #fbfbf7; box-shadow: 0 18px 55px #2b392015; }
+.auth-panel h1 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 42px; font-weight: 500; line-height: 1.04; }
+.auth-copy { margin: 14px 0 25px; color: #70766c; font-size: 13px; line-height: 1.6; }
+.auth-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border: 1px solid #d7dbce; border-radius: 4px; }
+.auth-switch button { min-height: 36px; border: 0; border-radius: 3px; background: transparent; color: #666d5f; font-size: 12px; }
+.auth-switch button[aria-pressed="true"] { background: #e8ebdc; color: #242a21; }
+.google-button { width: 100%; min-height: 42px; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; border: 1px solid #d7dbce; border-radius: 3px; background: #fff; color: #20251f; font-size: 12px; font-weight: 600; }
+.google-button span { font-size: 15px; font-weight: 700; }
+.auth-divider { display: flex; align-items: center; gap: 12px; margin: 18px 0; color: #888d83; font-size: 10px; }
+.auth-divider::before, .auth-divider::after { height: 1px; flex: 1; background: #e1e2da; content: ''; }
+.auth-form { display: grid; gap: 14px; }
+.auth-form .field span { color: #51594c; font-size: 11px; font-weight: 600; }
+.auth-form .field input { min-height: 41px; }
+.auth-form .add-button { width: 100%; margin-top: 2px; }
+.auth-message { margin: 0; color: #526b45; font-size: 12px; line-height: 1.5; }
 .content-wrap { width: min(1080px, calc(100% - 48px)); margin: 0 auto; }
 .intro { min-height: 310px; display: flex; align-items: center; justify-content: space-between; gap: 32px; padding: 52px 0 43px; }
 .eyebrow { margin: 0 0 14px; color: #77806c; font-size: 10px; font-weight: 700; letter-spacing: 1.4px; }
@@ -93,6 +111,8 @@ a { color: inherit; }
 @media (max-width: 650px) {
   .topbar { height: 64px; padding: 0 20px; }
   .topbar-note { max-width: 145px; text-align: right; font-size: 10px; }
+  .account-controls { gap: 10px; }
+  .account-controls .topbar-note { max-width: 135px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .content-wrap { width: calc(100% - 36px); }
   .intro { min-height: 270px; padding: 42px 0 35px; }
   .intro h1 { font-size: 48px; }
@@ -115,6 +135,8 @@ a { color: inherit; }
   .item-kind span { font-size: 9px; }
   .item-actions { grid-column: 2; justify-content: space-between; }
   .site-footer { padding: 0 18px; }
+  .auth-panel { padding: 27px 22px; }
+  .auth-panel h1 { font-size: 36px; }
 }
 
 @media (prefers-reduced-motion: no-preference) {

@@ -1,24 +1,63 @@
 import { useEffect, useState } from "react";
+import AuthForm from "./components/AuthForm.jsx";
 import AddItemForm from "./components/AddItemForm.jsx";
 import SavedItems from "./components/SavedItems.jsx";
-import { deleteSavedItem, getSavedItems, saveSavedItem } from "./lib/storage.js";
+import { deleteSavedItem, getFileDownloadUrl, getSavedItems, saveSavedItem } from "./lib/items.js";
+import { getCurrentSession, isSupabaseConfigured, onAuthStateChange, signOut } from "./lib/supabase.js";
 import "./App.css";
 
 function App() {
+  const [user, setUser] = useState(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(isSupabaseConfigured);
   const [items, setItems] = useState([]);
+  const [loadedUserId, setLoadedUserId] = useState(null);
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [storageError, setStorageError] = useState("");
 
   useEffect(() => {
+    if (!isSupabaseConfigured) return undefined;
+
+    let isCurrent = true;
+    const unsubscribe = onAuthStateChange((session) => {
+      setUser(session?.user ?? null);
+      setIsAuthLoading(false);
+    });
+    getCurrentSession()
+      .then((session) => {
+        if (isCurrent) setUser(session?.user ?? null);
+      })
+      .catch(() => {
+        if (isCurrent) setStorageError("Your sign-in session could not be checked.");
+      })
+      .finally(() => {
+        if (isCurrent) setIsAuthLoading(false);
+      });
+
+    return () => {
+      isCurrent = false;
+      unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user) return undefined;
+
     let isCurrent = true;
 
     getSavedItems()
       .then((savedItems) => {
-        if (isCurrent) setItems(savedItems);
+        if (isCurrent) {
+          setItems(savedItems);
+          setLoadedUserId(user.id);
+          setStorageError("");
+        }
       })
       .catch(() => {
-        if (isCurrent) setStorageError("Your saved items could not be loaded.");
+        if (isCurrent) {
+          setLoadedUserId(user.id);
+          setStorageError("Your saved items could not be loaded.");
+        }
       })
       .finally(() => {
         if (isCurrent) setIsLoading(false);
@@ -27,7 +66,7 @@ function App() {
     return () => {
       isCurrent = false;
     };
-  }, []);
+  }, [user]);
 
   async function addItem({ kind, name, description, url, file }) {
     const item = {
@@ -37,25 +76,54 @@ function App() {
       description: description.trim(),
       url,
       file,
-      fileName: file?.name,
       createdAt: new Date().toISOString(),
     };
 
-    await saveSavedItem(item);
-    setItems((currentItems) => [item, ...currentItems]);
+    const savedItem = await saveSavedItem(item);
+    setItems((currentItems) => [savedItem, ...currentItems]);
   }
 
   async function removeItem(id) {
-    await deleteSavedItem(id);
-    setItems((currentItems) => currentItems.filter((item) => item.id !== id));
+    try {
+      await deleteSavedItem(id);
+      setItems((currentItems) => currentItems.filter((item) => item.id !== id));
+    } catch {
+      setStorageError("This item could not be deleted. Please try again.");
+    }
+  }
+
+  async function downloadItem(item) {
+    try {
+      const url = await getFileDownloadUrl(item);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = item.fileName;
+      document.body.append(anchor);
+      anchor.click();
+      anchor.remove();
+    } catch {
+      setStorageError("This file could not be downloaded. Please try again.");
+    }
+  }
+
+  async function handleSignOut() {
+    const { error } = await signOut();
+    if (error) setStorageError("You could not be signed out. Please try again.");
   }
 
   const normalizedSearch = search.trim().toLowerCase();
-  const visibleItems = items.filter((item) =>
+  const userItems = loadedUserId === user?.id ? items : [];
+  const visibleItems = userItems.filter((item) =>
     [item.name, item.description, item.url, item.fileName]
       .filter(Boolean)
       .some((value) => value.toLowerCase().includes(normalizedSearch)),
   );
+
+  if (isAuthLoading) {
+    return <main className="auth-layout"><p role="status">Checking your account...</p></main>;
+  }
+
+  if (!user) return <AuthForm isConfigured={isSupabaseConfigured} />;
 
   return (
     <main className="app-shell">
@@ -64,7 +132,10 @@ function App() {
           <span className="brand-mark" aria-hidden="true">q</span>
           <span>quickkeep</span>
         </a>
-        <span className="topbar-note">A little space for the things worth keeping.</span>
+        <div className="account-controls">
+          <span className="topbar-note">{user.email}</span>
+          <button className="sign-out-button" type="button" onClick={handleSignOut}>Sign out</button>
+        </div>
       </header>
 
       <div className="content-wrap" id="home">
@@ -74,8 +145,8 @@ function App() {
             <h1 id="page-title">Keep what<br />you want to find.</h1>
             <p className="intro-copy">One home for useful links and files. No folders to keep track of.</p>
           </div>
-          <div className="item-total" aria-label={`${items.length} saved items`}>
-            <span>{String(items.length).padStart(2, "0")}</span>
+          <div className="item-total" aria-label={`${userItems.length} saved items`}>
+            <span>{String(userItems.length).padStart(2, "0")}</span>
             <small>items kept</small>
           </div>
         </section>
@@ -102,9 +173,10 @@ function App() {
           {storageError && <p className="status-message" role="alert">{storageError}</p>}
           <SavedItems
             items={visibleItems}
-            isLoading={isLoading}
-            hasItems={items.length > 0}
+            isLoading={isLoading || loadedUserId !== user.id}
+            hasItems={userItems.length > 0}
             onDelete={removeItem}
+            onDownload={downloadItem}
           />
         </section>
       </div>

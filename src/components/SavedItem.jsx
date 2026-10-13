@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function SavedItem({ item, onDelete }) {
+function SavedItem({ item, onDelete, onDownload }) {
   const [copied, setCopied] = useState(false);
   const isFile = item.kind === "file";
   const savedDate = new Date(item.createdAt).toLocaleDateString(undefined, {
@@ -17,16 +17,6 @@ function SavedItem({ item, onDelete }) {
     } catch {
       setCopied(false);
     }
-  }
-
-  function downloadFile() {
-    if (!item.file) return;
-    const downloadUrl = URL.createObjectURL(item.file);
-    const anchor = document.createElement("a");
-    anchor.href = downloadUrl;
-    anchor.download = item.fileName;
-    anchor.click();
-    URL.revokeObjectURL(downloadUrl);
   }
 
   return (
@@ -47,7 +37,7 @@ function SavedItem({ item, onDelete }) {
       <div className="item-actions">
         <time className="item-date" dateTime={item.createdAt}>{savedDate}</time>
         {isFile ? (
-          <button className="item-action" type="button" onClick={downloadFile} disabled={!item.file}>Download</button>
+          <button className="item-action" type="button" onClick={() => onDownload(item)}>Download</button>
         ) : (
           <button className="item-action" type="button" onClick={copyUrl}>{copied ? "Copied" : "Copy"}</button>
         )}

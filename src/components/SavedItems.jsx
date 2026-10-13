@@ -1,6 +1,6 @@
 import SavedItem from "./SavedItem.jsx";
 
-function SavedItems({ items, isLoading, hasItems, onDelete }) {
+function SavedItems({ items, isLoading, hasItems, onDelete, onDownload }) {
   if (isLoading) {
     return <div className="empty-state" role="status"><p>Loading your keep...</p></div>;
   }
@@ -16,7 +16,7 @@ function SavedItems({ items, isLoading, hasItems, onDelete }) {
 
   return (
     <div className="saved-list">
-      {items.map((item) => <SavedItem key={item.id} item={item} onDelete={onDelete} />)}
+      {items.map((item) => <SavedItem key={item.id} item={item} onDelete={onDelete} onDownload={onDownload} />)}
     </div>
   );
 }
