@@ -22,11 +22,11 @@ Responsive interface: Designed for convenient use across different screen sizes.
 ## Tech Stack
 
 * React =>	Building the user interface.
-Vite	=> Development server and build tool.
-JavaScript =>	Application logic.
-CSS =>	Styling and responsive layouts.
-Supabase	=> Authentication, database and backend services.
-PostgreSQL =>	Database for saved items.
-Supabase Storage =>	File storage.
-Vercel	=> Hosting and deployment.
-Git and GitHub =>	Version control and source code management.
+* Vite	=> Development server and build tool.
+* JavaScript =>	Application logic.
+* CSS =>	Styling and responsive layouts.
+* Supabase	=> Authentication, database and backend services.
+* PostgreSQL =>	Database for saved items.
+* Supabase Storage =>	File storage.
+* Vercel	=> Hosting and deployment.
+* Git and GitHub =>	Version control and source code management.
