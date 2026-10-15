@@ -21,7 +21,7 @@ Responsive interface: Designed for convenient use across different screen sizes.
 
 ## Tech Stack
 
-React =>	Building the user interface.
+* React =>	Building the user interface.
 Vite	=> Development server and build tool.
 JavaScript =>	Application logic.
 CSS =>	Styling and responsive layouts.
